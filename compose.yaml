@@ -1,0 +1,35 @@
+services:
+  formservicedb:
+    image: 'postgres:latest'
+    container_name: 'formservicedb'
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: ${DATABASE_NAME:-formservicedb}
+    ports:
+      - '5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-formservicedb}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  formservice:
+    build: .
+    container_name: formservice
+    depends_on:
+      - formservicedb
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://formservicedb:5432/${DATABASE_NAME:-formservicedb}
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  pgdata:
