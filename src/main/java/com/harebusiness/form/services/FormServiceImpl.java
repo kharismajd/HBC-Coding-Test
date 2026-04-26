@@ -1,9 +1,13 @@
 package com.harebusiness.form.services;
 
+import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.CreateFormRequestDto;
 import com.harebusiness.form.dtos.response.CreateFormResponseDto;
 import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
+import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
+import com.harebusiness.form.exceptions.ForbiddenAccessException;
+import com.harebusiness.form.exceptions.ResourceNotFoundException;
 import com.harebusiness.form.exceptions.UserNotFoundException;
 import com.harebusiness.form.models.AllowedDomain;
 import com.harebusiness.form.models.Form;
@@ -64,7 +68,7 @@ public class FormServiceImpl implements FormService {
         return createFormResponseDto;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public GetAllFormsResponseDto getAllForms(User user) {
         List<Form> forms = formRepository.findAllByCreatorIdOrderByIdDesc(user.getId());
 
@@ -85,6 +89,49 @@ public class FormServiceImpl implements FormService {
         GetAllFormsResponseDto response = new GetAllFormsResponseDto();
         response.setMessage(ResponseMessageConstant.GET_ALL_FORMS_SUCCESS_MESSAGE);
         response.setForms(formDtos);
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public GetFormDetailResponseDto getFormDetail(String slug, User user) {
+        Form form = formRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE));
+
+        List<String> allowedDomainList = form.getAllowedDomains().stream()
+                .map(AllowedDomain::getDomain)
+                .toList();
+        String userEmail = user.getEmail();
+        String userDomain = userEmail.substring(userEmail.indexOf("@") + 1);
+        if (!allowedDomainList.isEmpty() && !allowedDomainList.contains(userDomain)) {
+            throw new ForbiddenAccessException(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE);
+        }
+
+        List<GetFormDetailResponseDto.QuestionResponseDto> questionDtos = form.getQuestions().stream()
+                .map(question -> {
+                    GetFormDetailResponseDto.QuestionResponseDto qDto = new GetFormDetailResponseDto.QuestionResponseDto();
+                    qDto.setId(question.getId());
+                    qDto.setFormId(form.getId());
+                    qDto.setName(question.getName());
+                    qDto.setChoiceType(question.getChoiceType().getValue());
+                    qDto.setChoices(question.getChoices());
+                    qDto.setIsRequired(question.isRequired() ? 1 : 0);
+                    return qDto;
+                }).toList();
+
+        GetFormDetailResponseDto.FormDetailData formDto = new GetFormDetailResponseDto.FormDetailData();
+        formDto.setId(form.getId());
+        formDto.setName(form.getName());
+        formDto.setSlug(form.getSlug());
+        formDto.setDescription(form.getDescription());
+        formDto.setLimitOneResponse(form.isLimitOneResponse() ? 1 : 0);
+        formDto.setCreatorId(form.getCreator().getId());
+        formDto.setAllowedDomains(allowedDomainList);
+        formDto.setQuestions(questionDtos);
+
+        GetFormDetailResponseDto response = new GetFormDetailResponseDto();
+        response.setMessage(ResponseMessageConstant.GET_FORM_SUCCESS_MESSAGE);
+        response.setForm(formDto);
 
         return response;
     }

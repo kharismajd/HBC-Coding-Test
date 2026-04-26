@@ -5,7 +5,7 @@ import com.harebusiness.form.constants.OpenApiConstant;
 import com.harebusiness.form.dtos.request.CreateFormRequestDto;
 import com.harebusiness.form.dtos.response.CreateFormResponseDto;
 import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
-import com.harebusiness.form.dtos.response.LoginResponseDto;
+import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
 import com.harebusiness.form.models.AuthenticatedUser;
 import com.harebusiness.form.services.FormService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,8 +19,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -96,6 +96,15 @@ public class FormController {
     ) {
         GetAllFormsResponseDto response = formService.getAllForms(currentUser.getUserEntity());
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{slug}")
+    public ResponseEntity<GetFormDetailResponseDto> getFormDetail(
+            @PathVariable String slug,
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        GetFormDetailResponseDto response = formService.getFormDetail(slug, currentUser.getUserEntity());
         return ResponseEntity.ok(response);
     }
 }
