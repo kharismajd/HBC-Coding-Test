@@ -9,14 +9,12 @@ import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
 import com.harebusiness.form.enums.ChoiceType;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
 import com.harebusiness.form.exceptions.ResourceNotFoundException;
-import com.harebusiness.form.exceptions.UserNotFoundException;
 import com.harebusiness.form.models.AllowedDomain;
 import com.harebusiness.form.models.Form;
 import com.harebusiness.form.models.Question;
 import com.harebusiness.form.models.User;
 import com.harebusiness.form.repositories.AllowedDomainRepository;
 import com.harebusiness.form.repositories.FormRepository;
-import com.harebusiness.form.repositories.UserRepository;
 import com.harebusiness.form.services.FormServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,9 +44,6 @@ class FormServiceImplTest {
 
     @Mock
     private AllowedDomainRepository allowedDomainRepository;
-
-    @Mock
-    private UserRepository userRepository;
 
     @InjectMocks
     private FormServiceImpl formService;
