@@ -27,7 +27,7 @@ public class SecurityBeansConfig {
                     .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
 
             return new org.springframework.security.core.userdetails.User(
-                    user.getEmail(),
+                    user.getId().toString(),
                     user.getPassword(),
                     new ArrayList<>()
             );
