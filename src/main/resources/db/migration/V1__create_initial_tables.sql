@@ -2,7 +2,7 @@ CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL CHECK (LENGTH(password) >= 5),
+    password VARCHAR(255) NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE
 );
 

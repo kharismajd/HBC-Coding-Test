@@ -41,7 +41,6 @@ public class User {
     private String email;
 
     @NotBlank
-    @Size(min = 5)
     @Column(name = "password")
     private String password;
 
