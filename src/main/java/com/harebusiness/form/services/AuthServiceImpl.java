@@ -4,14 +4,19 @@ import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.LoginRequestDto;
 import com.harebusiness.form.dtos.response.LoginResponseDto;
+import com.harebusiness.form.dtos.response.LogoutResponseDto;
 import com.harebusiness.form.exceptions.IncorrectEmailOrPasswordException;
 import com.harebusiness.form.models.User;
 import com.harebusiness.form.repositories.UserRepository;
 import com.harebusiness.form.utils.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.apache.bcel.ExceptionConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.Instant;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -50,6 +55,23 @@ public class AuthServiceImpl implements AuthService {
         loginResponseDto.setUser(userData);
 
         return loginResponseDto;
+    }
+
+    public LogoutResponseDto logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+
+            Instant expiry = jwtUtil.extractExpiration(token);
+            long secondsRemaining = Duration.between(Instant.now(), expiry).toSeconds();
+
+            if (secondsRemaining > 0) {
+                tokenBlacklistService.blacklistToken(token, secondsRemaining);
+            }
+        }
+
+        return new LogoutResponseDto(ResponseMessageConstant.LOGOUT_SUCCESS_MESSAGE);
     }
 
 }

@@ -10,4 +10,5 @@ public class ControllerConstant {
     public static final String AUTH_PATH_V1 = API_V1 + AUTH;
 
     public static final String LOGIN = "/login";
+    public static final String LOGOUT = "/logout";
 }

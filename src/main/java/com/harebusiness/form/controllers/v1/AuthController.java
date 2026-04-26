@@ -3,6 +3,7 @@ package com.harebusiness.form.controllers.v1;
 import com.harebusiness.form.constants.ControllerConstant;
 import com.harebusiness.form.dtos.request.LoginRequestDto;
 import com.harebusiness.form.services.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,5 +22,10 @@ public class AuthController {
     @PostMapping(ControllerConstant.LOGIN)
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDto request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping(ControllerConstant.LOGOUT)
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        return ResponseEntity.ok(authService.logout(request));
     }
 }
