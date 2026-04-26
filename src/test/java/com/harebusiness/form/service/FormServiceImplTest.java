@@ -1,11 +1,18 @@
 package com.harebusiness.form.service;
 
+import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.CreateFormRequestDto;
 import com.harebusiness.form.dtos.response.CreateFormResponseDto;
 import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
+import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
+import com.harebusiness.form.enums.ChoiceType;
+import com.harebusiness.form.exceptions.ForbiddenAccessException;
+import com.harebusiness.form.exceptions.ResourceNotFoundException;
 import com.harebusiness.form.exceptions.UserNotFoundException;
+import com.harebusiness.form.models.AllowedDomain;
 import com.harebusiness.form.models.Form;
+import com.harebusiness.form.models.Question;
 import com.harebusiness.form.models.User;
 import com.harebusiness.form.repositories.AllowedDomainRepository;
 import com.harebusiness.form.repositories.FormRepository;
@@ -49,6 +56,8 @@ class FormServiceImplTest {
 
     private CreateFormRequestDto requestDto;
     private User mockUser;
+    private User mockUser2;
+    private Form mockForm;
     private final Long userId = 1L;
 
     @BeforeEach
@@ -63,6 +72,21 @@ class FormServiceImplTest {
         mockUser = new User();
         mockUser.setId(userId);
         mockUser.setEmail("user@test.com");
+
+        mockUser2 = new User();
+        mockUser2.setId(1L);
+        mockUser2.setEmail("test@webtech.id");
+
+        User creator = new User();
+        creator.setId(2L);
+
+        mockForm = new Form();
+        mockForm.setId(10L);
+        mockForm.setName("Test Form");
+        mockForm.setSlug("test-slug");
+        mockForm.setDescription("Desc");
+        mockForm.setLimitOneResponse(true);
+        mockForm.setCreator(creator);
     }
 
     @Test
@@ -135,5 +159,55 @@ class FormServiceImplTest {
         
         assertTrue(result.getForms().isEmpty());
         assertEquals(ResponseMessageConstant.GET_ALL_FORMS_SUCCESS_MESSAGE, result.getMessage());
+    }
+
+    @Test
+    void getFormDetail_Success() {
+        AllowedDomain allowedDomain = new AllowedDomain();
+        allowedDomain.setDomain("webtech.id");
+        mockForm.setAllowedDomains(List.of(allowedDomain));
+
+        Question question = new Question();
+        question.setId(100L);
+        question.setName("Sex");
+        question.setChoiceType(ChoiceType.MULTIPLE_CHOICE);
+        question.setChoices("Male,Female");
+        question.setRequired(true);
+        question.setForm(mockForm);
+        mockForm.setQuestions(List.of(question));
+
+        when(formRepository.findBySlug("test-slug")).thenReturn(Optional.of(mockForm));
+
+        GetFormDetailResponseDto result = formService.getFormDetail("test-slug", mockUser2);
+
+        assertNotNull(result);
+        assertEquals("multiple choice", result.getForm().getQuestions().get(0).getChoiceType());
+        assertEquals("Male,Female", result.getForm().getQuestions().get(0).getChoices());
+    }
+
+    @Test
+    void getFormDetail_whenFormNotFound_shouldThrowsException() {
+        when(formRepository.findBySlug("invalid-slug")).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            formService.getFormDetail("invalid-slug", mockUser);
+        });
+
+        assertEquals(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE, exception.getMessage());
+    }
+
+    @Test
+    void getFormDetail_whenForbiddenDomain_shouldThrowsException() {
+        AllowedDomain allowedDomain = new AllowedDomain();
+        allowedDomain.setDomain("domainqu.com");
+        mockForm.setAllowedDomains(List.of(allowedDomain));
+
+        when(formRepository.findBySlug("test-slug")).thenReturn(Optional.of(mockForm));
+
+        ForbiddenAccessException exception = assertThrows(ForbiddenAccessException.class, () -> {
+            formService.getFormDetail("test-slug", mockUser);
+        });
+
+        assertEquals(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE, exception.getMessage());
     }
 }
