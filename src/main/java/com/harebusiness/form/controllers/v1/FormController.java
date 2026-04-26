@@ -78,6 +78,18 @@ public class FormController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get all forms")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get all forms successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GetAllFormsResponseDto.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "401", ref = "UnauthorizedError")
+    })
     @GetMapping
     public ResponseEntity<GetAllFormsResponseDto> getAllForms(
             @AuthenticationPrincipal AuthenticatedUser currentUser
