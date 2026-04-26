@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FormRepository extends JpaRepository<Form, Long> {
 
+    boolean existsBySlug(String slug);
 }

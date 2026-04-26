@@ -5,6 +5,7 @@ import com.harebusiness.form.dtos.response.BasicExceptionResponseDto;
 import com.harebusiness.form.dtos.response.InvalidFieldExceptionResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,12 +18,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<InvalidFieldExceptionResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         Map<String, List<String>> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-            String fieldName = error.getField();
+            String fieldName = toSnakeCase(error.getField());
             String errorMessage = error.getDefaultMessage();
 
             errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
@@ -42,5 +48,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = UnauthenticatedException.class)
     public ResponseEntity<?> handleUnauthenticatedException(UnauthenticatedException e) {
         return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    private String toSnakeCase(String input) {
+        return input.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
     }
 }
