@@ -3,6 +3,7 @@ package com.harebusiness.form.service;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.CreateFormRequestDto;
 import com.harebusiness.form.dtos.response.CreateFormResponseDto;
+import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
 import com.harebusiness.form.exceptions.UserNotFoundException;
 import com.harebusiness.form.models.Form;
 import com.harebusiness.form.models.User;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
@@ -85,5 +87,53 @@ class FormServiceImplTest {
         assertEquals(userId, result.getForm().getCreatorId());
         verify(formRepository, times(1)).save(any(Form.class));
         verify(allowedDomainRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void getAllForms_Success() {
+        Form form1 = new Form();
+        form1.setId(10L);
+        form1.setName("Form 1");
+        form1.setSlug("form-1");
+        form1.setLimitOneResponse(true);
+        form1.setCreator(mockUser);
+
+        Form form2 = new Form();
+        form2.setId(9L);
+        form2.setName("Form 2");
+        form2.setSlug("form-2");
+        form2.setLimitOneResponse(false);
+        form2.setCreator(mockUser);
+
+        when(formRepository.findAllByCreatorIdOrderByIdDesc(userId))
+                .thenReturn(List.of(form1, form2));
+
+        GetAllFormsResponseDto result = formService.getAllForms(mockUser);
+
+        assertNotNull(result);
+        assertEquals(ResponseMessageConstant.GET_ALL_FORMS_SUCCESS_MESSAGE, result.getMessage());
+        assertEquals(2, result.getForms().size());
+
+        GetAllFormsResponseDto.FormDataResponse firstForm = result.getForms().get(0);
+        assertEquals(10L, firstForm.getId());
+        assertEquals("Form 1", firstForm.getName());
+        assertEquals(1, firstForm.getLimitOneResponse());
+        assertEquals(userId, firstForm.getCreatorId());
+
+        GetAllFormsResponseDto.FormDataResponse secondForm = result.getForms().get(1);
+        assertEquals(9L, secondForm.getId());
+        assertEquals(0, secondForm.getLimitOneResponse());
+
+        verify(formRepository, times(1)).findAllByCreatorIdOrderByIdDesc(userId);
+    }
+
+    @Test
+    void getAllForms_EmptyList() {
+        when(formRepository.findAllByCreatorIdOrderByIdDesc(userId)).thenReturn(List.of());
+
+        GetAllFormsResponseDto result = formService.getAllForms(mockUser);
+        
+        assertTrue(result.getForms().isEmpty());
+        assertEquals(ResponseMessageConstant.GET_ALL_FORMS_SUCCESS_MESSAGE, result.getMessage());
     }
 }
