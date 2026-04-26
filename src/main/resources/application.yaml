@@ -8,3 +8,19 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+jwt:
+  secret: ${JWT_SECRET:3lDWydtReyVsRW5WJUKcxZH2s6sQzrhDOou0pM1UyBN}
+  expiration: 86400000
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html

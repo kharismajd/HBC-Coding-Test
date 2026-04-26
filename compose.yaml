@@ -14,15 +14,23 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+  formserviceredis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
   formservice:
     build: .
     container_name: formservice
     depends_on:
       - formservicedb
+      - formserviceredis
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://formservicedb:5432/${DATABASE_NAME:-formservicedb}
       SPRING_DATASOURCE_USERNAME: ${DATABASE_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      SPRING_REDIS_HOST: ${REDIS_HOST:-formserviceredis}
+      SPRING_REDIS_PORT: ${REDIS_PORT:-6379}
     ports:
       - "8080:8080"
     healthcheck:
