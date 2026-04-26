@@ -1,16 +1,40 @@
 package com.harebusiness.form.exceptions;
 
 import com.harebusiness.form.dtos.response.BasicExceptionResponseDto;
+import com.harebusiness.form.dtos.response.InvalidFieldExceptionResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    public ResponseEntity<InvalidFieldExceptionResponseDto> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+
+            errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
+        });
+
+        InvalidFieldExceptionResponseDto response = new InvalidFieldExceptionResponseDto("Invalid field", errors);
+
+        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+
     @ExceptionHandler(value = IncorrectEmailOrPasswordException.class)
     public ResponseEntity<?> handleIncorrectEmailOrPasswordException(IncorrectEmailOrPasswordException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new BasicExceptionResponseDto(e.getMessage()));
+        return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 }
