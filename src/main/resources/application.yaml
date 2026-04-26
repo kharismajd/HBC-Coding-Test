@@ -24,3 +24,5 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
+app:
+  public-paths: /api/v1/auth/login, /swagger-ui/**, /v3/api-docs/**, /actuator/health
