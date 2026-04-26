@@ -1,6 +1,7 @@
 package com.harebusiness.form.configs;
 
 import com.harebusiness.form.exceptions.UserNotFoundException;
+import com.harebusiness.form.models.AuthenticatedUser;
 import com.harebusiness.form.models.User;
 import com.harebusiness.form.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -26,11 +27,7 @@ public class SecurityBeansConfig {
             User user = userRepository.findByIdAndIsDeletedFalse(Long.parseLong(id))
                     .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
 
-            return new org.springframework.security.core.userdetails.User(
-                    user.getId().toString(),
-                    user.getPassword(),
-                    new ArrayList<>()
-            );
+            return new AuthenticatedUser(user);
         };
     }
 }

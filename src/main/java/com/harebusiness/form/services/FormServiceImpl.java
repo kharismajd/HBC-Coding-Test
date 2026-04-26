@@ -3,6 +3,7 @@ package com.harebusiness.form.services;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.CreateFormRequestDto;
 import com.harebusiness.form.dtos.response.CreateFormResponseDto;
+import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
 import com.harebusiness.form.exceptions.UserNotFoundException;
 import com.harebusiness.form.models.AllowedDomain;
 import com.harebusiness.form.models.Form;
@@ -30,10 +31,7 @@ public class FormServiceImpl implements FormService {
     private UserRepository userRepository;
 
     @Transactional
-    public CreateFormResponseDto createForm(CreateFormRequestDto request, Long userId) {
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
-
+    public CreateFormResponseDto createForm(CreateFormRequestDto request, User user) {
         Form form = new Form();
         form.setName(request.getName());
         form.setSlug(request.getSlug());
@@ -60,9 +58,34 @@ public class FormServiceImpl implements FormService {
         responseForm.setSlug(savedForm.getSlug());
         responseForm.setDescription(savedForm.getDescription());
         responseForm.setLimitOneResponse(savedForm.isLimitOneResponse());
-        responseForm.setCreatorId(userId);
+        responseForm.setCreatorId(user.getId());
         createFormResponseDto.setForm(responseForm);
 
         return createFormResponseDto;
+    }
+
+    @Transactional
+    public GetAllFormsResponseDto getAllForms(User user) {
+        List<Form> forms = formRepository.findAllByCreatorIdOrderByIdDesc(user.getId());
+
+        List<GetAllFormsResponseDto.FormDataResponse> formDtos = forms.stream()
+                .map(form -> {
+                    GetAllFormsResponseDto.FormDataResponse dto = new GetAllFormsResponseDto.FormDataResponse();
+                    dto.setId(form.getId());
+                    dto.setName(form.getName());
+                    dto.setSlug(form.getSlug());
+                    dto.setDescription(form.getDescription());
+
+                    dto.setLimitOneResponse(form.isLimitOneResponse() ? 1 : 0);
+
+                    dto.setCreatorId(form.getCreator().getId());
+                    return dto;
+                }).toList();
+
+        GetAllFormsResponseDto response = new GetAllFormsResponseDto();
+        response.setMessage(ResponseMessageConstant.GET_ALL_FORMS_SUCCESS_MESSAGE);
+        response.setForms(formDtos);
+
+        return response;
     }
 }
