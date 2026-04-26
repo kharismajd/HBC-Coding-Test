@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
@@ -31,40 +33,48 @@ public class JwtAuthenticationInterceptor extends OncePerRequestFilter {
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
+    @Autowired
+    @Qualifier("handlerExceptionResolver")
+    private HandlerExceptionResolver handlerExceptionResolver;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        //TODO: Fix global unauthenticated exception handler
-        final String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        final String jwt = authHeader.substring(7);
-
-        if (tokenBlacklistService.isTokenBlacklisted(jwt)) {
-            throw new UnauthenticatedException(ExceptionMessageConstant.UNAUTHENTICATED_MESSAGE);
-        }
-
         try {
-            final String userId = jwtUtil.extractId(jwt);
+            final String authHeader = request.getHeader("Authorization");
 
-            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userId);
-
-                if (jwtUtil.isTokenValid(jwt, Long.parseLong(userDetails.getUsername()))) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
             }
-        } catch (Exception e) {
-            throw new UnauthenticatedException(ExceptionMessageConstant.UNAUTHENTICATED_MESSAGE);
+
+            final String jwt = authHeader.substring(7);
+
+            if (tokenBlacklistService.isTokenBlacklisted(jwt)) {
+                throw new UnauthenticatedException(ExceptionMessageConstant.UNAUTHENTICATED_MESSAGE);
+            }
+
+            try {
+                final String userId = jwtUtil.extractId(jwt);
+
+                if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(userId);
+
+                    if (jwtUtil.isTokenValid(jwt, Long.parseLong(userDetails.getUsername()))) {
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
+                }
+            } catch (Exception e) {
+                throw new UnauthenticatedException(ExceptionMessageConstant.UNAUTHENTICATED_MESSAGE);
+            }
+
+            filterChain.doFilter(request, response);
+        } catch (Exception ex) {
+            handlerExceptionResolver.resolveException(request, response, null, ex);
         }
 
-        filterChain.doFilter(request, response);
     }
 }
