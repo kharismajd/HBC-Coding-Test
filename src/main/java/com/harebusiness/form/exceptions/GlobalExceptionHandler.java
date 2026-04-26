@@ -38,4 +38,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleIncorrectEmailOrPasswordException(IncorrectEmailOrPasswordException e) {
         return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(value = UnauthenticatedException.class)
+    public ResponseEntity<?> handleUnauthenticatedException(UnauthenticatedException e) {
+        return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
 }
