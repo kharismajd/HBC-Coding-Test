@@ -68,7 +68,7 @@ public class FormController {
                             )
                     )
             ),
-            @ApiResponse(responseCode = "401", ref = "UnauthorizedError")
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR)
     })
     @PostMapping
     public ResponseEntity<CreateFormResponseDto> createForm(
@@ -88,7 +88,7 @@ public class FormController {
                             schema = @Schema(implementation = GetAllFormsResponseDto.class)
                     )
             ),
-            @ApiResponse(responseCode = "401", ref = "UnauthorizedError")
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR)
     })
     @GetMapping
     public ResponseEntity<GetAllFormsResponseDto> getAllForms(
@@ -99,6 +99,20 @@ public class FormController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get form detail")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get form detail successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GetFormDetailResponseDto.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR),
+            @ApiResponse(responseCode = "404", ref = OpenApiConstant.FORM_NOT_FOUND_ERROR),
+            @ApiResponse(responseCode = "403", ref = OpenApiConstant.FORBIDDEN_ACCESS_ERROR),
+    })
     @GetMapping("/{slug}")
     public ResponseEntity<GetFormDetailResponseDto> getFormDetail(
             @PathVariable String slug,
