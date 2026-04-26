@@ -5,7 +5,7 @@ import com.harebusiness.form.constants.OpenApiConstant;
 import com.harebusiness.form.dtos.request.CreateFormRequestDto;
 import com.harebusiness.form.dtos.response.CreateFormResponseDto;
 import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
-import com.harebusiness.form.dtos.response.LoginResponseDto;
+import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
 import com.harebusiness.form.models.AuthenticatedUser;
 import com.harebusiness.form.services.FormService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,8 +19,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,7 +68,7 @@ public class FormController {
                             )
                     )
             ),
-            @ApiResponse(responseCode = "401", ref = "UnauthorizedError")
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR)
     })
     @PostMapping
     public ResponseEntity<CreateFormResponseDto> createForm(
@@ -88,7 +88,7 @@ public class FormController {
                             schema = @Schema(implementation = GetAllFormsResponseDto.class)
                     )
             ),
-            @ApiResponse(responseCode = "401", ref = "UnauthorizedError")
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR)
     })
     @GetMapping
     public ResponseEntity<GetAllFormsResponseDto> getAllForms(
@@ -96,6 +96,29 @@ public class FormController {
     ) {
         GetAllFormsResponseDto response = formService.getAllForms(currentUser.getUserEntity());
 
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get form detail")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get form detail successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GetFormDetailResponseDto.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR),
+            @ApiResponse(responseCode = "404", ref = OpenApiConstant.FORM_NOT_FOUND_ERROR),
+            @ApiResponse(responseCode = "403", ref = OpenApiConstant.FORBIDDEN_ACCESS_ERROR),
+    })
+    @GetMapping("/{slug}")
+    public ResponseEntity<GetFormDetailResponseDto> getFormDetail(
+            @PathVariable String slug,
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        GetFormDetailResponseDto response = formService.getFormDetail(slug, currentUser.getUserEntity());
         return ResponseEntity.ok(response);
     }
 }

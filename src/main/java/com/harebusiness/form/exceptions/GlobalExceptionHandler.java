@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
             errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
         });
 
-        InvalidFieldExceptionResponseDto response = new InvalidFieldExceptionResponseDto(ExceptionMessageConstant.INVALID_FIELD, errors);
+        InvalidFieldExceptionResponseDto response = new InvalidFieldExceptionResponseDto(ExceptionMessageConstant.INVALID_FIELD_MESSAGE, errors);
 
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
     }
@@ -48,6 +48,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = UnauthenticatedException.class)
     public ResponseEntity<?> handleUnauthenticatedException(UnauthenticatedException e) {
         return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(value = ForbiddenAccessException.class)
+    public ResponseEntity<?> handleForbiddenAccessException(ForbiddenAccessException e) {
+        return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException e) {
+        return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     private String toSnakeCase(String input) {

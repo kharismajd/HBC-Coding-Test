@@ -88,7 +88,7 @@ public class AuthController {
                             examples = @ExampleObject(value = "{\"message\": \"Logout success\"}")
                     )
             ),
-            @ApiResponse(responseCode = "401", ref = "UnauthorizedError")
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR)
         }
     )
     @PostMapping(ControllerConstant.LOGOUT)
