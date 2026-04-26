@@ -73,30 +73,17 @@ class FormServiceImplTest {
         savedForm.setLimitOneResponse(requestDto.isLimitOneResponse());
         savedForm.setCreator(mockUser);
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(mockUser));
         when(formRepository.save(any(Form.class))).thenReturn(savedForm);
         when(allowedDomainRepository.saveAll(anyList())).thenReturn(List.of());
 
-        CreateFormResponseDto result = formService.createForm(requestDto, userId);
+        CreateFormResponseDto result = formService.createForm(requestDto, mockUser);
 
         assertNotNull(result);
         assertEquals(ResponseMessageConstant.CREATE_FORM_SUCCESS_MESSAGE, result.getMessage());
         assertEquals(100L, result.getForm().getId());
         assertEquals("test-form", result.getForm().getSlug());
         assertEquals(userId, result.getForm().getCreatorId());
-        verify(userRepository, times(1)).findByIdAndIsDeletedFalse(userId);
         verify(formRepository, times(1)).save(any(Form.class));
         verify(allowedDomainRepository, times(1)).saveAll(anyList());
-    }
-
-    @Test
-    void createForm_whenUserNotFound_shouldThrowsException() {
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.empty());
-
-        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> formService.createForm(requestDto, userId));
-
-        assertEquals("User not found with ID: " + userId, exception.getMessage());
-        verify(formRepository, never()).save(any());
-        verify(allowedDomainRepository, never()).saveAll(any());
     }
 }

@@ -4,7 +4,9 @@ import com.harebusiness.form.constants.ControllerConstant;
 import com.harebusiness.form.constants.OpenApiConstant;
 import com.harebusiness.form.dtos.request.CreateFormRequestDto;
 import com.harebusiness.form.dtos.response.CreateFormResponseDto;
+import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
 import com.harebusiness.form.dtos.response.LoginResponseDto;
+import com.harebusiness.form.models.AuthenticatedUser;
 import com.harebusiness.form.services.FormService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,8 +73,17 @@ public class FormController {
     @PostMapping
     public ResponseEntity<CreateFormResponseDto> createForm(
             @Valid @RequestBody CreateFormRequestDto request,
-            @AuthenticationPrincipal User defaultUser) {
-        CreateFormResponseDto response = formService.createForm(request, Long.parseLong(defaultUser.getUsername()));
+            @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        CreateFormResponseDto response = formService.createForm(request, currentUser.getUserEntity());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<GetAllFormsResponseDto> getAllForms(
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        GetAllFormsResponseDto response = formService.getAllForms(currentUser.getUserEntity());
+
         return ResponseEntity.ok(response);
     }
 }
