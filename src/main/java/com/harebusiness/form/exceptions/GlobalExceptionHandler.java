@@ -1,5 +1,6 @@
 package com.harebusiness.form.exceptions;
 
+import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.dtos.response.BasicExceptionResponseDto;
 import com.harebusiness.form.dtos.response.InvalidFieldExceptionResponseDto;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<InvalidFieldExceptionResponseDto> handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ResponseEntity<InvalidFieldExceptionResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         Map<String, List<String>> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error -> {
@@ -27,7 +28,7 @@ public class GlobalExceptionHandler {
             errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
         });
 
-        InvalidFieldExceptionResponseDto response = new InvalidFieldExceptionResponseDto("Invalid field", errors);
+        InvalidFieldExceptionResponseDto response = new InvalidFieldExceptionResponseDto(ExceptionMessageConstant.INVALID_FIELD, errors);
 
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
     }
