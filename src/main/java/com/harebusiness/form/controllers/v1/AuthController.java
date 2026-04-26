@@ -1,8 +1,10 @@
 package com.harebusiness.form.controllers.v1;
 
 import com.harebusiness.form.constants.ControllerConstant;
+import com.harebusiness.form.constants.OpenApiConstant;
 import com.harebusiness.form.dtos.request.LoginRequestDto;
 import com.harebusiness.form.services.AuthService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ public class AuthController {
     }
 
     @PostMapping(ControllerConstant.LOGOUT)
+    @SecurityRequirement(name = OpenApiConstant.AUTHORIZATION)
     public ResponseEntity<?> logout(HttpServletRequest request) {
         return ResponseEntity.ok(authService.logout(request));
     }
