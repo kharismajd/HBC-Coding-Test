@@ -14,6 +14,7 @@ import org.aspectj.apache.bcel.ExceptionConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -33,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
+    @Transactional(readOnly = true)
     public LoginResponseDto login(LoginRequestDto request) {
         String email = request.getEmail();
         String password = request.getPassword();
