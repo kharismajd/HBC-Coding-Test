@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BasicExceptionResponseDto {
+public class RemoveQuestionResponseDto {
 
     private String message;
-
 }

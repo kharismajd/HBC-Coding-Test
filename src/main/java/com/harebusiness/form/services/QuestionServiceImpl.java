@@ -4,6 +4,7 @@ import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.AddQuestionRequestDto;
 import com.harebusiness.form.dtos.response.AddQuestionResponseDto;
+import com.harebusiness.form.dtos.response.RemoveQuestionResponseDto;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
 import com.harebusiness.form.exceptions.ResourceNotFoundException;
 import com.harebusiness.form.models.Form;
@@ -62,5 +63,22 @@ public class QuestionServiceImpl implements QuestionService {
         response.setQuestion(questionData);
 
         return response;
+    }
+
+    @Transactional
+    public RemoveQuestionResponseDto removeQuestion(String slug, Long questionId, User user) {
+        Form form = formRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE));
+
+        if (!form.getCreator().getId().equals(user.getId())) {
+            throw new ForbiddenAccessException(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE);
+        }
+
+        Question question = questionRepository.findByIdAndFormId(questionId, form.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionMessageConstant.QUESTION_NOT_FOUND_MESSAGE));
+
+        questionRepository.delete(question);
+
+        return new RemoveQuestionResponseDto(ResponseMessageConstant.REMOVE_QUESTION_SUCCESS_MESSAGE);
     }
 }
