@@ -31,7 +31,14 @@ public class GlobalExceptionHandler {
             String fieldName = toSnakeCase(error.getField());
             String errorMessage = error.getDefaultMessage();
 
-            errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
+            String flattenedFieldName = fieldName.replaceAll("\\[\\d+\\]", "");
+
+            errors.computeIfAbsent(flattenedFieldName, k -> new ArrayList<>()).add(errorMessage);
+        });
+
+        errors.forEach((key, value) -> {
+            List<String> uniqueMessages = value.stream().distinct().toList();
+            errors.put(key, new ArrayList<>(uniqueMessages));
         });
 
         InvalidFieldExceptionResponseDto response = new InvalidFieldExceptionResponseDto(ExceptionMessageConstant.INVALID_FIELD_MESSAGE, errors);
