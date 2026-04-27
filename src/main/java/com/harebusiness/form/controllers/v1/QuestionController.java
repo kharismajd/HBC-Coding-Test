@@ -4,8 +4,14 @@ import com.harebusiness.form.constants.ControllerConstant;
 import com.harebusiness.form.constants.OpenApiConstant;
 import com.harebusiness.form.dtos.request.AddQuestionRequestDto;
 import com.harebusiness.form.dtos.response.AddQuestionResponseDto;
+import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
 import com.harebusiness.form.models.AuthenticatedUser;
 import com.harebusiness.form.services.QuestionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +31,20 @@ public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
+    @Operation(summary = "Add question to a form")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Add question successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AddQuestionResponseDto.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR),
+            @ApiResponse(responseCode = "404", ref = OpenApiConstant.FORM_NOT_FOUND_ERROR),
+            @ApiResponse(responseCode = "403", ref = OpenApiConstant.FORBIDDEN_ACCESS_ERROR),
+    })
     @PostMapping
     public ResponseEntity<AddQuestionResponseDto> addQuestion(
             @PathVariable String slug,
