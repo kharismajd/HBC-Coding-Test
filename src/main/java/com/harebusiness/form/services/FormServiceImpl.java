@@ -8,7 +8,6 @@ import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
 import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
 import com.harebusiness.form.exceptions.ResourceNotFoundException;
-import com.harebusiness.form.exceptions.UserNotFoundException;
 import com.harebusiness.form.models.AllowedDomain;
 import com.harebusiness.form.models.Form;
 import com.harebusiness.form.models.User;
