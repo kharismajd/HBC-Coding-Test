@@ -76,6 +76,20 @@ public class ResponseController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get all answer for a form")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get response success",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GetAllResponsesDto.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "404", ref = OpenApiConstant.FORM_NOT_FOUND_ERROR),
+            @ApiResponse(responseCode = "403", ref = OpenApiConstant.FORBIDDEN_ACCESS_ERROR),
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR)
+    })
     @GetMapping
     public ResponseEntity<GetAllResponsesDto> getAllResponses(
             @PathVariable String slug,
