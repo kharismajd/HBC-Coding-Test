@@ -3,6 +3,7 @@ package com.harebusiness.form.services;
 import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.SubmitResponseRequestDto;
+import com.harebusiness.form.dtos.response.GetAllResponsesDto;
 import com.harebusiness.form.dtos.response.SubmitResponseResponseDto;
 import com.harebusiness.form.enums.ChoiceType;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
@@ -21,9 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,6 +99,53 @@ public class ResponseServiceImpl implements ResponseService {
         responseRepository.save(response);
 
         return new SubmitResponseResponseDto(ResponseMessageConstant.SUBMIT_RESPONSE_SUCCESS_MESSAGE);
+    }
+
+    @Transactional(readOnly = true)
+    public GetAllResponsesDto getAllResponses(String slug, User user) {
+        Form form = formRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE));
+
+        if (!form.getCreator().getId().equals(user.getId())) {
+            throw new ForbiddenAccessException(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE);
+        }
+
+        List<Response> responses = responseRepository.findAllByFormId(form.getId());
+
+        List<GetAllResponsesDto.ResponseData> responseDataList = responses.stream().map(r -> {
+            GetAllResponsesDto.ResponseData dto = new GetAllResponsesDto.ResponseData();
+            LocalDateTime localResponseDate = null;
+            if (!Objects.isNull(r.getDate())) {
+                localResponseDate = r.getDate().atZoneSameInstant(ZoneId.of("Asia/Makassar")).toLocalDateTime();
+            }
+            dto.setDate(localResponseDate);
+
+            GetAllResponsesDto.UserDto userDto = new GetAllResponsesDto.UserDto();
+            userDto.setId(r.getUser().getId());
+            userDto.setName(r.getUser().getName());
+            userDto.setEmail(r.getUser().getEmail());
+
+            LocalDateTime localEmailVerifiedAt = null;
+            if (!Objects.isNull(r.getUser().getEmailVerifiedAt())) {
+                localEmailVerifiedAt = r.getUser().getEmailVerifiedAt().atZoneSameInstant(ZoneId.of("Asia/Makassar")).toLocalDateTime();
+            }
+            userDto.setEmailVerifiedAt(localEmailVerifiedAt);
+            dto.setUser(userDto);
+
+            Map<String, String> answerMap = new LinkedHashMap<>();
+            for (Answer a : r.getAnswers()) {
+                answerMap.put(a.getQuestion().getName(), a.getValue());
+            }
+            dto.setAnswers(answerMap);
+
+            return dto;
+        }).toList();
+
+        GetAllResponsesDto getAllResponsesDto = new GetAllResponsesDto();
+        getAllResponsesDto.setMessage(ResponseMessageConstant.GET_RESPONSE_SUCCESS_MESSAGE);
+        getAllResponsesDto.setResponses(responseDataList);
+
+        return getAllResponsesDto;
     }
 
     private void validateValueFormat(ChoiceType type, String value, List<String> errors) {
