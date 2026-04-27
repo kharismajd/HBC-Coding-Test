@@ -28,6 +28,7 @@ public class OpenApiConfig {
         BasicExceptionResponseDto forbiddenExample = new BasicExceptionResponseDto(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE);
         BasicExceptionResponseDto formNotFoundExample = new BasicExceptionResponseDto(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE);
         BasicExceptionResponseDto questionNotFoundExample = new BasicExceptionResponseDto(ExceptionMessageConstant.QUESTION_NOT_FOUND_MESSAGE);
+        BasicExceptionResponseDto oneResponseLimitExample = new BasicExceptionResponseDto(ExceptionMessageConstant.ONE_RESPONSE_LIMIT_MESSAGE);
 
         return new OpenAPI()
                 .components(new Components()
@@ -47,6 +48,10 @@ public class OpenApiConfig {
                                 .description("Question not found error")
                                 .content(new Content().addMediaType("application/json",
                                         new MediaType().example(questionNotFoundExample))))
+                        .addResponses(OpenApiConstant.ONE_RESPONSE_LIMIT_ERROR, new ApiResponse()
+                                .description("One response limit error")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().example(oneResponseLimitExample))))
                 );
     }
 }

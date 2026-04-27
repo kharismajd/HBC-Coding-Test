@@ -10,4 +10,5 @@ public class OpenApiConstant {
     public static final String FORBIDDEN_ACCESS_ERROR = "ForbiddenAccessError";
     public static final String FORM_NOT_FOUND_ERROR = "FormNotFoundError";
     public static final String QUESTION_NOT_FOUND_ERROR = "QuestionNotFoundError";
+    public static final String ONE_RESPONSE_LIMIT_ERROR = "OneResponseLimitError";
 }
