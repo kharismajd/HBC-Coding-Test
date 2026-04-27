@@ -9,6 +9,7 @@ import com.harebusiness.form.models.AuthenticatedUser;
 import com.harebusiness.form.services.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -66,9 +67,18 @@ public class QuestionController {
                             schema = @Schema(implementation = RemoveQuestionResponseDto.class)
                     )
             ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found Errors",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = {
+                                    @ExampleObject(name = "Form Not Found", ref = OpenApiConstant.FORM_NOT_FOUND_ERROR),
+                                    @ExampleObject(name = "Question Not Found", ref = OpenApiConstant.QUESTION_NOT_FOUND_ERROR)
+                            }
+                    )
+            ),
             @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR),
-            @ApiResponse(responseCode = "404", ref = OpenApiConstant.FORM_NOT_FOUND_ERROR),
-            @ApiResponse(responseCode = "404", ref = OpenApiConstant.QUESTION_NOT_FOUND_ERROR),
             @ApiResponse(responseCode = "403", ref = OpenApiConstant.FORBIDDEN_ACCESS_ERROR),
     })
     @DeleteMapping("/{questionId}")
