@@ -10,7 +10,7 @@ public interface FormService {
 
     CreateFormResponseDto createForm(CreateFormRequestDto request, User user);
 
-    public GetAllFormsResponseDto getAllForms(User user);
+    GetAllFormsResponseDto getAllForms(User user);
 
-    public GetFormDetailResponseDto getFormDetail(String slug, User user);
+    GetFormDetailResponseDto getFormDetail(String slug, User user);
 }
