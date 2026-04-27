@@ -147,12 +147,12 @@ public class ResponseServiceImplTest {
 
     @Test
     void submitResponse_whenValidationFails_accumulatesErrors() {
-        form.getQuestions().add(createQuestion(1L, ChoiceType.SHORT_ANSWER, true, null)); // Missing answer
-        form.getQuestions().add(createQuestion(2L, ChoiceType.DATE, false, null)); // Invalid Date
-        form.getQuestions().add(createQuestion(3L, ChoiceType.TIME, false, null)); // Invalid Time
-        form.getQuestions().add(createQuestion(4L, ChoiceType.MULTIPLE_CHOICE, false, "Red,Blue")); // MCQ with comma
-        form.getQuestions().add(createQuestion(5L, ChoiceType.DROPDOWN, false, "Small,Large")); // Invalid Dropdown
-        form.getQuestions().add(createQuestion(6L, ChoiceType.CHECKBOXES, false, "Java,PHP")); // Invalid Checkbox
+        form.getQuestions().add(createQuestion(1L, ChoiceType.SHORT_ANSWER, true, null));
+        form.getQuestions().add(createQuestion(2L, ChoiceType.DATE, false, null));
+        form.getQuestions().add(createQuestion(3L, ChoiceType.TIME, false, null));
+        form.getQuestions().add(createQuestion(4L, ChoiceType.MULTIPLE_CHOICE, false, "Red,Blue"));
+        form.getQuestions().add(createQuestion(5L, ChoiceType.DROPDOWN, false, "Small,Large"));
+        form.getQuestions().add(createQuestion(6L, ChoiceType.CHECKBOXES, false, "Java,PHP"));
 
         SubmitResponseRequestDto request = new SubmitResponseRequestDto();
         request.setAnswers(List.of(
@@ -172,7 +172,7 @@ public class ResponseServiceImplTest {
         assertTrue(errorsMap.containsKey("answers"));
 
         List<String> errors = errorsMap.get("answers");
-        assertEquals(6, errors.size()); // All 6 errors should be caught
+        assertEquals(6, errors.size());
 
         assertTrue(errors.contains("The answers field is required."));
         assertTrue(errors.contains("The answers field must be a valid date format."));
