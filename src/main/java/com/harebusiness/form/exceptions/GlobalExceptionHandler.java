@@ -3,6 +3,7 @@ package com.harebusiness.form.exceptions;
 import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.dtos.response.BasicExceptionResponseDto;
 import com.harebusiness.form.dtos.response.InvalidFieldExceptionResponseDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,11 +17,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        log.warn("Malformed JSON request received: {}", e.getMessage());
         return new ResponseEntity<>(new BasicExceptionResponseDto("Invalid JSON body"), HttpStatus.BAD_REQUEST);
     }
 
@@ -89,6 +92,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BasicExceptionResponseDto> handleGeneralException(Exception e) {
+        log.error("Unhandled exception occurred: ", e);
         return new ResponseEntity<>(new BasicExceptionResponseDto("Internal Server Error"), HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
