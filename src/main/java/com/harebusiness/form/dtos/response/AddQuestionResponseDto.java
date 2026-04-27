@@ -30,6 +30,6 @@ public class AddQuestionResponseDto {
         private String choices;
 
         @JsonProperty("is_required")
-        private boolean isRequired;
+        private boolean required;
     }
 }

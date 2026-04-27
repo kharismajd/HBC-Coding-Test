@@ -16,4 +16,5 @@ public class ControllerConstant {
     public static final String LOGOUT = "/logout";
 
     public static final String QUESTION = "/question";
+    public static final String RESPONSE = "/response";
 }

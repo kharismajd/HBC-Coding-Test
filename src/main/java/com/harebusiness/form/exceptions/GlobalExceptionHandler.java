@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @ExceptionHandler(ValidationFieldException.class)
+    public ResponseEntity<Object> handleManualValidation(ValidationFieldException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("message", ExceptionMessageConstant.INVALID_FIELD_MESSAGE);
+        body.put("errors", ex.getErrors());
+
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
 
     @ExceptionHandler(value = IncorrectEmailOrPasswordException.class)
     public ResponseEntity<?> handleIncorrectEmailOrPasswordException(IncorrectEmailOrPasswordException e) {
@@ -65,6 +75,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException e) {
         return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = OneResponseLimitException.class)
+    public ResponseEntity<?> handleOneResponseLimitException(OneResponseLimitException e) {
+        return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     private String toSnakeCase(String input) {

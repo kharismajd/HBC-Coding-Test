@@ -11,6 +11,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,8 +45,13 @@ public class Response {
     private User user;
 
     @Column(name = "date")
-    private OffsetDateTime date = OffsetDateTime.now();
+    private OffsetDateTime date;
 
     @OneToMany(mappedBy = "response", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Answer> answers;
+
+    @PrePersist
+    public void prePersist() {
+        this.date = OffsetDateTime.now();
+    }
 }
