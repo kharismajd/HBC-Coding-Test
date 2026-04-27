@@ -47,9 +47,12 @@ public class FormServiceImpl implements FormService {
         List<AllowedDomain> allowedDomains = new ArrayList<>();
         for (String domain : request.getAllowedDomains()) {
             AllowedDomain allowedDomain = new AllowedDomain();
-            allowedDomain.setDomain(domain);
-            allowedDomain.setForm(form);
-            allowedDomains.add(allowedDomain);
+            String trimmedDomain = domain.replaceAll("\\s+", "");
+            if (!trimmedDomain.isEmpty()) {
+                allowedDomain.setDomain(trimmedDomain);
+                allowedDomain.setForm(form);
+                allowedDomains.add(allowedDomain);
+            }
         }
         allowedDomainRepository.saveAll(allowedDomains);
 
