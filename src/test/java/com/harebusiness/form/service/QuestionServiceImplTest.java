@@ -4,6 +4,7 @@ import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.AddQuestionRequestDto;
 import com.harebusiness.form.dtos.response.AddQuestionResponseDto;
+import com.harebusiness.form.dtos.response.RemoveQuestionResponseDto;
 import com.harebusiness.form.enums.ChoiceType;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
 import com.harebusiness.form.exceptions.ResourceNotFoundException;
@@ -47,7 +48,9 @@ public class QuestionServiceImplTest {
 
     private User owner;
     private Form form;
+    private Question question;
     private String slug = "test-slug";
+    private final Long questionId = 100L;
 
     @BeforeEach
     void setUp() {
@@ -58,6 +61,10 @@ public class QuestionServiceImplTest {
         form.setId(10L);
         form.setSlug(slug);
         form.setCreator(owner);
+
+        question = new Question();
+        question.setId(questionId);
+        question.setForm(form);
     }
 
     @Test
@@ -133,5 +140,57 @@ public class QuestionServiceImplTest {
 
         assertEquals(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE, ex.getMessage());
         verify(questionRepository, never()).save(any());
+    }
+
+    @Test
+    void removeQuestion_success() {
+        when(formRepository.findBySlug(slug)).thenReturn(Optional.of(form));
+        when(questionRepository.findByIdAndFormId(questionId, form.getId())).thenReturn(Optional.of(question));
+
+        RemoveQuestionResponseDto response = questionService.removeQuestion(slug, questionId, owner);
+
+        assertNotNull(response);
+        assertEquals(ResponseMessageConstant.REMOVE_QUESTION_SUCCESS_MESSAGE, response.getMessage());
+        verify(questionRepository, times(1)).delete(question);
+    }
+
+    @Test
+    void removeQuestion_whenFormNotFound_shouldThrowsException() {
+        when(formRepository.findBySlug("invalid-slug")).thenReturn(Optional.empty());
+
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () ->
+                questionService.removeQuestion("invalid-slug", questionId, owner)
+        );
+
+        assertEquals(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE, ex.getMessage());
+        verify(questionRepository, never()).delete(any());
+    }
+
+    @Test
+    void removeQuestion_whenForbiddenAccess_shouldThrowsException() {
+        User sus = new User();
+        sus.setId(2L);
+
+        when(formRepository.findBySlug(slug)).thenReturn(Optional.of(form));
+
+        ForbiddenAccessException ex = assertThrows(ForbiddenAccessException.class, () ->
+                questionService.removeQuestion(slug, questionId, sus)
+        );
+
+        assertEquals(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE, ex.getMessage());
+        verify(questionRepository, never()).delete(any());
+    }
+
+    @Test
+    void removeQuestion_QuestionNotFound_ThrowsException() {
+        when(formRepository.findBySlug(slug)).thenReturn(Optional.of(form));
+        when(questionRepository.findByIdAndFormId(questionId, form.getId())).thenReturn(Optional.empty());
+
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () ->
+                questionService.removeQuestion(slug, questionId, owner)
+        );
+
+        assertEquals(ExceptionMessageConstant.QUESTION_NOT_FOUND_MESSAGE, ex.getMessage());
+        verify(questionRepository, never()).delete(any());
     }
 }
