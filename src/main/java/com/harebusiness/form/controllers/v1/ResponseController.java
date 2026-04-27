@@ -48,7 +48,7 @@ public class ResponseController {
                     description = "Invalid field",
                     content = @Content(
                             mediaType = "application/json",
-                            examples = { @ExampleObject(value = """
+                            examples = @ExampleObject(value = """
                                     {
                                       "message": "Invalid field",
                                       "errors": {
@@ -58,11 +58,10 @@ public class ResponseController {
                                       }
                                     }
                                     """
-                            ),
-                                    @ExampleObject(name = "One Response Limit Error", ref = OpenApiConstant.ONE_RESPONSE_LIMIT_ERROR)
-                            }
+                            )
                     )
             ),
+            @ApiResponse(responseCode = "422", ref = OpenApiConstant.ONE_RESPONSE_LIMIT_ERROR),
             @ApiResponse(responseCode = "403", ref = OpenApiConstant.FORBIDDEN_ACCESS_ERROR),
             @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR)
     })
