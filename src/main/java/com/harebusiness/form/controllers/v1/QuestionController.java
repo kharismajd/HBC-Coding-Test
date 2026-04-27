@@ -56,6 +56,21 @@ public class QuestionController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Remove a question from a form")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Add question successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = RemoveQuestionResponseDto.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "401", ref = OpenApiConstant.UNAUTHENTICATED_ERROR),
+            @ApiResponse(responseCode = "404", ref = OpenApiConstant.FORM_NOT_FOUND_ERROR),
+            @ApiResponse(responseCode = "404", ref = OpenApiConstant.QUESTION_NOT_FOUND_ERROR),
+            @ApiResponse(responseCode = "403", ref = OpenApiConstant.FORBIDDEN_ACCESS_ERROR),
+    })
     @DeleteMapping("/{questionId}")
     public ResponseEntity<RemoveQuestionResponseDto> removeQuestion(
             @PathVariable String slug,

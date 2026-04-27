@@ -27,6 +27,7 @@ public class OpenApiConfig {
         BasicExceptionResponseDto unauthExample = new BasicExceptionResponseDto(ExceptionMessageConstant.UNAUTHENTICATED_MESSAGE);
         BasicExceptionResponseDto forbiddenExample = new BasicExceptionResponseDto(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE);
         BasicExceptionResponseDto formNotFoundExample = new BasicExceptionResponseDto(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE);
+        BasicExceptionResponseDto questionNotFoundExample = new BasicExceptionResponseDto(ExceptionMessageConstant.QUESTION_NOT_FOUND_MESSAGE);
 
         return new OpenAPI()
                 .components(new Components()
@@ -42,6 +43,10 @@ public class OpenApiConfig {
                                 .description("Form not found error")
                                 .content(new Content().addMediaType("application/json",
                                         new MediaType().example(formNotFoundExample))))
+                        .addResponses(OpenApiConstant.QUESTION_NOT_FOUND_ERROR, new ApiResponse()
+                                .description("Question not found error")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().example(questionNotFoundExample))))
                 );
     }
 }
