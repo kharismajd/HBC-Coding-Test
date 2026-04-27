@@ -1,6 +1,7 @@
 package com.harebusiness.form.validations;
 
 import com.harebusiness.form.dtos.request.AddQuestionRequestDto;
+import com.harebusiness.form.enums.ChoiceType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,7 +14,7 @@ public class ChoicesValidator implements ConstraintValidator<ValidChoices, AddQu
     @Override
     public boolean isValid(AddQuestionRequestDto dto, ConstraintValidatorContext context) {
         if (dto.getChoiceType() == null) return true;
-        boolean requiresChoices = switch (dto.getChoiceType()) {
+        boolean requiresChoices = switch (ChoiceType.fromString(dto.getChoiceType())) {
             case MULTIPLE_CHOICE, DROPDOWN, CHECKBOXES -> true;
             default -> false;
         };

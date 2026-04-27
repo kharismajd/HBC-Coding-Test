@@ -24,7 +24,7 @@ public class AddQuestionRequestDto {
 
     @NotNull(message = "The choice type field is required.")
     @JsonProperty("choice_type")
-    private ChoiceType choiceType;
+    private String choiceType;
 
     private List<@NotBlank(message = "The choices element must be a string.") String> choices;
 

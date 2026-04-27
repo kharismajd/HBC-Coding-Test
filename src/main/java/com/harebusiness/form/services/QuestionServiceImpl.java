@@ -5,6 +5,7 @@ import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.AddQuestionRequestDto;
 import com.harebusiness.form.dtos.response.AddQuestionResponseDto;
 import com.harebusiness.form.dtos.response.RemoveQuestionResponseDto;
+import com.harebusiness.form.enums.ChoiceType;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
 import com.harebusiness.form.exceptions.ResourceNotFoundException;
 import com.harebusiness.form.models.Form;
@@ -36,7 +37,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         Question question = new Question();
         question.setName(request.getName());
-        question.setChoiceType(request.getChoiceType());
+        question.setChoiceType(ChoiceType.fromString(request.getChoiceType()));
         question.setRequired(request.isRequired());
         question.setForm(form);
 

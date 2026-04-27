@@ -82,6 +82,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @ExceptionHandler(value = InvalidChoiceTypeException.class)
+    public ResponseEntity<?> handleInvalidChoiceTypeException(InvalidChoiceTypeException e) {
+        return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
     private String toSnakeCase(String input) {
         return input.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
     }

@@ -71,7 +71,7 @@ public class QuestionServiceImplTest {
     void addQuestion_withChoices_success() {
         AddQuestionRequestDto request = new AddQuestionRequestDto();
         request.setName("Favorite Framework");
-        request.setChoiceType(ChoiceType.MULTIPLE_CHOICE);
+        request.setChoiceType(ChoiceType.MULTIPLE_CHOICE.getValue());
         request.setChoices(List.of("React", "Vue", "Angular"));
         request.setRequired(true);
 
@@ -97,7 +97,7 @@ public class QuestionServiceImplTest {
     void addQuestion_noChoicesRequired_success() {
         AddQuestionRequestDto request = new AddQuestionRequestDto();
         request.setName("Wawa?");
-        request.setChoiceType(ChoiceType.PARAGRAPH);
+        request.setChoiceType(ChoiceType.PARAGRAPH.getValue());
         request.setChoices(null);
         request.setRequired(false);
 
