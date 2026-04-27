@@ -3,6 +3,7 @@ package com.harebusiness.form.service;
 import com.harebusiness.form.constants.ExceptionMessageConstant;
 import com.harebusiness.form.constants.ResponseMessageConstant;
 import com.harebusiness.form.dtos.request.SubmitResponseRequestDto;
+import com.harebusiness.form.dtos.response.GetAllResponsesDto;
 import com.harebusiness.form.dtos.response.SubmitResponseResponseDto;
 import com.harebusiness.form.enums.ChoiceType;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
@@ -10,6 +11,7 @@ import com.harebusiness.form.exceptions.OneResponseLimitException;
 import com.harebusiness.form.exceptions.ResourceNotFoundException;
 import com.harebusiness.form.exceptions.ValidationFieldException;
 import com.harebusiness.form.models.AllowedDomain;
+import com.harebusiness.form.models.Answer;
 import com.harebusiness.form.models.Form;
 import com.harebusiness.form.models.Question;
 import com.harebusiness.form.models.Response;
@@ -24,6 +26,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,6 +73,7 @@ public class ResponseServiceImplTest {
         form.setLimitOneResponse(false);
         form.setAllowedDomains(new ArrayList<>());
         form.setQuestions(new ArrayList<>());
+        form.setCreator(user);
     }
 
     private SubmitResponseRequestDto.AnswerItem createAnswerItem(Long questionId, String value) {
@@ -182,5 +189,63 @@ public class ResponseServiceImplTest {
         assertTrue(errors.contains("One or more selected checkboxes are invalid."));
 
         verify(responseRepository, never()).save(any());
+    }
+
+    @Test
+    void getAllResponses_success() {
+        User respondent = new User();
+        respondent.setId(2L);
+        respondent.setName("Jukut kangkung");
+        respondent.setEmail("kangkungmang@example.com");
+        OffsetDateTime verifiedAt = OffsetDateTime.of(2023, 1, 1, 1, 0, 0, 0, ZoneOffset.UTC);
+        respondent.setEmailVerifiedAt(verifiedAt);
+
+        Question q = new Question();
+        q.setName("Your Name");
+
+        Response responseEntity = new Response();
+        responseEntity.setUser(respondent);
+        responseEntity.setDate(OffsetDateTime.of(2023, 10, 24, 2, 0, 0, 0, ZoneOffset.UTC));
+
+        Answer answer = new Answer();
+        answer.setQuestion(q);
+        answer.setValue("Om Janji");
+        responseEntity.setAnswers(List.of(answer));
+
+        when(formRepository.findBySlug(slug)).thenReturn(Optional.of(form));
+        when(responseRepository.findAllByFormId(form.getId())).thenReturn(List.of(responseEntity));
+
+        GetAllResponsesDto result = responseService.getAllResponses(slug, user);
+
+        GetAllResponsesDto.ResponseData data = result.getResponses().get(0);
+        assertNotNull(result);
+        assertEquals(ResponseMessageConstant.GET_RESPONSE_SUCCESS_MESSAGE, result.getMessage());
+        assertEquals(1, result.getResponses().size());
+        assertEquals(LocalDateTime.of(2023, 10, 24, 10, 0), data.getDate());
+        assertEquals(LocalDateTime.of(2023, 1, 1, 9, 0), data.getUser().getEmailVerifiedAt());
+        assertEquals("Om Janji", data.getAnswers().get("Your Name"));
+    }
+
+    @Test
+    void getAllResponses_whenNotCreator_shouldThrowsForbidden() {
+        User sus = new User();
+        sus.setId(99L);
+        when(formRepository.findBySlug(slug)).thenReturn(Optional.of(form));
+
+        ForbiddenAccessException ex = assertThrows(ForbiddenAccessException.class,
+                () -> responseService.getAllResponses(slug, sus));
+
+        assertEquals(ExceptionMessageConstant.FORBIDDEN_ACCESS_MESSAGE, ex.getMessage());
+        verify(responseRepository, never()).findAllByFormId(anyLong());
+    }
+
+    @Test
+    void getAllResponses_whenSlugInvalid_shouldThrowsNotFound() {
+        when(formRepository.findBySlug("metal-slug")).thenReturn(Optional.empty());
+
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+                () -> responseService.getAllResponses("metal-slug", user));
+
+        assertEquals(ExceptionMessageConstant.FORM_NOT_FOUND_MESSAGE, ex.getMessage());
     }
 }
