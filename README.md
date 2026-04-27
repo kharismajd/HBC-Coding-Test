@@ -5,8 +5,8 @@ A RESTful Form Builder and Submission API built with Java and Spring Boot. This 
 
 ## Tech Stack
 
-* **Language:** Java 17+
-* **Framework:** Spring Boot 3.x
+* **Language:** Java 17
+* **Framework:** Spring Boot 4.0.6
 * **Security:** Spring Security & JWT (JSON Web Tokens)
 * **Database:** PostgreSQL
 * **Migrations:** Flyway
