@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new BasicExceptionResponseDto("Invalid JSON body"), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -85,6 +85,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = InvalidChoiceTypeException.class)
     public ResponseEntity<?> handleInvalidChoiceTypeException(InvalidChoiceTypeException e) {
         return new ResponseEntity<>(new BasicExceptionResponseDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<BasicExceptionResponseDto> handleGeneralException(Exception e) {
+        return new ResponseEntity<>(new BasicExceptionResponseDto("Internal Server Error"), HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 
     private String toSnakeCase(String input) {
