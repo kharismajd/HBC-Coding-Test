@@ -8,7 +8,6 @@ import com.harebusiness.form.dtos.response.GetAllFormsResponseDto;
 import com.harebusiness.form.dtos.response.GetFormDetailResponseDto;
 import com.harebusiness.form.exceptions.ForbiddenAccessException;
 import com.harebusiness.form.exceptions.ResourceNotFoundException;
-import com.harebusiness.form.exceptions.UserNotFoundException;
 import com.harebusiness.form.models.AllowedDomain;
 import com.harebusiness.form.models.Form;
 import com.harebusiness.form.models.User;
@@ -47,9 +46,12 @@ public class FormServiceImpl implements FormService {
         List<AllowedDomain> allowedDomains = new ArrayList<>();
         for (String domain : request.getAllowedDomains()) {
             AllowedDomain allowedDomain = new AllowedDomain();
-            allowedDomain.setDomain(domain);
-            allowedDomain.setForm(form);
-            allowedDomains.add(allowedDomain);
+            String trimmedDomain = domain.replaceAll("\\s+", "");
+            if (!trimmedDomain.isEmpty()) {
+                allowedDomain.setDomain(trimmedDomain);
+                allowedDomain.setForm(form);
+                allowedDomains.add(allowedDomain);
+            }
         }
         allowedDomainRepository.saveAll(allowedDomains);
 

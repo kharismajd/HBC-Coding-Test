@@ -1,6 +1,8 @@
 package com.harebusiness.form.validations;
 
 import com.harebusiness.form.dtos.request.AddQuestionRequestDto;
+import com.harebusiness.form.enums.ChoiceType;
+import com.harebusiness.form.exceptions.InvalidChoiceTypeException;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,16 +15,22 @@ public class ChoicesValidator implements ConstraintValidator<ValidChoices, AddQu
     @Override
     public boolean isValid(AddQuestionRequestDto dto, ConstraintValidatorContext context) {
         if (dto.getChoiceType() == null) return true;
-        boolean requiresChoices = switch (dto.getChoiceType()) {
-            case MULTIPLE_CHOICE, DROPDOWN, CHECKBOXES -> true;
-            default -> false;
-        };
+        try {
+            ChoiceType type = ChoiceType.fromString(dto.getChoiceType());
 
-        if (requiresChoices) {
-            if (dto.getChoices() == null || dto.getChoices().isEmpty()) {
+            boolean requiresChoices = switch (type) {
+                case MULTIPLE_CHOICE, DROPDOWN, CHECKBOXES -> true;
+                default -> false;
+            };
+
+            if (requiresChoices && (dto.getChoices() == null || dto.getChoices().isEmpty())) {
                 addError(context, "choices", "The choices must be an array.");
                 return false;
             }
+
+        } catch (InvalidChoiceTypeException e) {
+            addError(context, "choice_type", e.getMessage());
+            return false;
         }
 
         return true;
