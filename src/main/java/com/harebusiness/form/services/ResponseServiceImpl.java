@@ -75,7 +75,7 @@ public class ResponseServiceImpl implements ResponseService {
             String value = requestAnswerMap.get(question.getId());
 
             if (question.isRequired() && (value == null || value.trim().isEmpty())) {
-                errors.add("The answers field is required.");
+                errors.add("The answer value for question with id: " + question.getId() + " is required");
                 continue;
             }
 
