@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +27,9 @@ public class AddQuestionRequestDto {
     @JsonProperty("choice_type")
     private String choiceType;
 
-    private List<@NotBlank(message = "The choices element must be a string.") String> choices;
+    private List<
+            @NotBlank(message = "The choices element must be a string.")
+            @Pattern(regexp = "^[^,]*$", message = "The choices element cannot contain a comma.") String> choices;
 
     @JsonProperty("is_required")
     private boolean required;
