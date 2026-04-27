@@ -10,4 +10,5 @@ public class ResponseMessageConstant {
     public static final String ADD_QUESTION_SUCCESS_MESSAGE = "Add question success";
     public static final String REMOVE_QUESTION_SUCCESS_MESSAGE = "Remove question success";
     public static final String SUBMIT_RESPONSE_SUCCESS_MESSAGE = "Submit response success";
+    public static final String GET_RESPONSE_SUCCESS_MESSAGE = "Get response success";
 }

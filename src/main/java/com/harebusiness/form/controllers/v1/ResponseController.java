@@ -3,7 +3,7 @@ package com.harebusiness.form.controllers.v1;
 import com.harebusiness.form.constants.ControllerConstant;
 import com.harebusiness.form.constants.OpenApiConstant;
 import com.harebusiness.form.dtos.request.SubmitResponseRequestDto;
-import com.harebusiness.form.dtos.response.CreateFormResponseDto;
+import com.harebusiness.form.dtos.response.GetAllResponsesDto;
 import com.harebusiness.form.dtos.response.SubmitResponseResponseDto;
 import com.harebusiness.form.models.AuthenticatedUser;
 import com.harebusiness.form.services.ResponseServiceImpl;
@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,6 +72,15 @@ public class ResponseController {
             @Valid @RequestBody SubmitResponseRequestDto request,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
         SubmitResponseResponseDto response = responseService.submitResponse(slug, request, currentUser.getUserEntity());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<GetAllResponsesDto> getAllResponses(
+            @PathVariable String slug,
+            @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        GetAllResponsesDto response = responseService.getAllResponses(slug, currentUser.getUserEntity());
 
         return ResponseEntity.ok(response);
     }

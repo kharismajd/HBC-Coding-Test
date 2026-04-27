@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -46,6 +47,9 @@ public class User {
 
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
+
+    @Column(name = "email_verified_at")
+    private OffsetDateTime emailVerifiedAt;
 
     @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     private List<Form> forms;
